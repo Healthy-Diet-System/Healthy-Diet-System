@@ -1,0 +1,8 @@
+create table Nutritionist (Nutritionist_ID integer constraint pk1 primary key , fname varchar2(15), lname varchar2(15), email varchar2(30), password varchar2(20), phone_number varchar2(15), Years_Of_Experience integer, specializedIn varchar2(20));
+
+create table customer (Customer_ID integer constraint pk2 primary key , fname varchar2(15), lname varchar2(15), email varchar2(30) constraint un1 unique, password varchar2(15),weight integer, height integer, age integer,gender varchar2(10), phone_number varchar2(15), nutritionist_id integer constraint fk1 references nutritionist (nutritionist_id) on delete set null);
+
+insert into customer values ( 1, 'sami', 'bardisi', 'sami@outlook.com', 'sami1', 70, 172, 22,'male', '0562954125', null);
+insert into customer values ( 2, 'Tareq', 'tester', 'tareq@outlook.com', 'tareq2', null, null, null, null, '0594167834', null);
+insert into customer values ( 3, 'sara', 'khalid', 'sara@outlook.com', 'sara3', 75, 155, 23,'female', '0542675189', null);
+
