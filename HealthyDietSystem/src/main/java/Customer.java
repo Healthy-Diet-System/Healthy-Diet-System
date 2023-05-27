@@ -1,33 +1,25 @@
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Customer extends User {
-    private int age;
-    private int height;
-    private int weight;
+    public int age;
+    public int height;
+    public int weight;
+    public int nid;
+    public String gender;
 
-    public Customer(int id, String fname, String lname, String phoneNum, String email) {
-        super(id, fname, lname, phoneNum, email);
+
+    public Customer(int id, String fname, String lname, String email, String password, String phoneNum) {
+        super(id, fname, lname, email, password, phoneNum);
     }
 
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public int getWeight() {
-        return weight;
-    }
-
-    public void setWeight(int weight) {
+    public Customer(int id, String fname, String lname, String email, String password, int weight, int height, int age, String gender, String phoneNum, int nid) {
+        super(id, fname, lname, email, password, phoneNum);
         this.weight = weight;
+        this.height = height;
+        this.age = age;
+        this.gender = gender;
+        this.nid = nid;
     }
+
 }

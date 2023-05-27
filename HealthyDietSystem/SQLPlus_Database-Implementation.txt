@@ -1,8 +1,11 @@
-create table Nutritionist (Nutritionist_ID integer constraint pk1 primary key , fname varchar2(15), lname varchar2(15), email varchar2(30), password varchar2(20), phone_number varchar2(15), Years_Of_Experience integer, specializedIn varchar2(20));
+create table Nutritionist (Nutritionist_ID integer constraint pk1 primary key , fname varchar2(15), lname varchar2(15), email varchar2(30), password varchar2(20), phone_number varchar2(15), Years_Of_Experience integer);
+create table customer (Customer_ID integer constraint pk2 primary key , fname varchar2(15), lname varchar2(15), email varchar2(30) constraint un1 unique, password varchar2(15),weight integer, height integer, age integer,gender varchar2(10), phone_number varchar2(15));
+create table plan (plan_id integer,  plan_name varchar2(25), Duration varchar2(20), price integer, Nutritionist_ID integer constraint fk4 references Nutritionist (Nutritionist_ID),constraint plan_pk primary key(plan_Id, Nutritionist_ID), customer_ID integer constraint fk5 references customer (customer_ID));
 
-create table customer (Customer_ID integer constraint pk2 primary key , fname varchar2(15), lname varchar2(15), email varchar2(30) constraint un1 unique, password varchar2(15),weight integer, height integer, age integer,gender varchar2(10), phone_number varchar2(15), nutritionist_id integer constraint fk1 references nutritionist (nutritionist_id) on delete set null);
 
-insert into customer values ( 1, 'sami', 'bardisi', 'sami@outlook.com', 'sami1', 70, 172, 22,'male', '0562954125', null);
-insert into customer values ( 2, 'Tareq', 'tester', 'tareq@outlook.com', 'tareq2', null, null, null, null, '0594167834', null);
-insert into customer values ( 3, 'sara', 'khalid', 'sara@outlook.com', 'sara3', 75, 155, 23,'female', '0542675189', null);
+insert into Nutritionist  values ( 1, 'Ahmed', 'Alghamdi', 'ahmed1@outlook.com', 'ahmed1', '0511111111', 5);
+insert into Nutritionist  values ( 2, 'Fahad', 'Alharbi', 'fah2@outlook.com', 'fahad2', '0522222222', 10);
+insert into Nutritionist  values ( 3, 'Ryan', 'Alzahrani', 'rayan3@outlook.com', 'ryan3', '0533333333', 15);
+insert into Nutritionist  values ( 4, 'Sara', 'Kobe', 'kha4@outlook.com', 'khalid3', '0544444444', 23);
+
 
