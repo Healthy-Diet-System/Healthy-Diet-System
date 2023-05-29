@@ -1,3 +1,5 @@
+import javafx.scene.control.RadioButton;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -9,9 +11,10 @@ public class AppFacade extends JFrame {
     static PreparedStatement preparedStatement = null;
     static Statement statement;
 
+
     public void startApp(){
         try {
-            Javaconnect dbConnection = Javaconnect.getInstance();   /// SINGLETON
+            Javaconnect dbConnection = Javaconnect.getInstance();   // Pattern 2
             connection = dbConnection.getConnection();
 
         } catch (SQLException e){
@@ -24,7 +27,7 @@ public class AppFacade extends JFrame {
     }
 
 
-    public static void loginScreen(){
+    public void loginScreen(){
 
         JFrame loginFrame = new JFrame();
 
@@ -101,8 +104,26 @@ public class AppFacade extends JFrame {
 
 
                     if(rezult.getString("password").equals(passwordInput)){   // Compare passwordInput with the password saved in database
-                        servicesScreen(rezult.getString("customer_id"));
+                        int id = rezult.getInt("Customer_ID");
+                        String fname = rezult.getString("fname");
+                        String lname = rezult.getString("lname");
+                        int weight = rezult.getInt("weight");
+                        int height = rezult.getInt("height");
+                        int age = rezult.getInt("age");
+                        String gender = rezult.getString("gender");
+                        String phoneNum = rezult.getString("phone_number");
+
+                        Customer cust;
+                        if(gender == null){
+                            cust = new Customer(id, fname, lname, emailInput, passwordInput, phoneNum);
+                        }
+                        else{
+                            cust = new Customer(id, fname, lname, emailInput, passwordInput, weight, height, age, gender, phoneNum);
+                        }
+
+                        servicesScreen(cust);
                         loginFrame.setVisible(false);
+
 
                     }
                     else{
@@ -129,7 +150,7 @@ public class AppFacade extends JFrame {
 
     }
 
-    public static void registerScreen(){
+    public void registerScreen(){
 
         JFrame registerFrame = new JFrame("Register");
 
@@ -231,6 +252,8 @@ public class AppFacade extends JFrame {
                             ResultSet rezult2 = preparedStatement.executeQuery();
                             rezult2.next();
 
+
+
                         }
 
                     } catch (SQLException ae) {
@@ -243,13 +266,13 @@ public class AppFacade extends JFrame {
     }
 
 
-    public static void servicesScreen(String userIDLog)
+    public void servicesScreen(Customer cust)
     {
         JFrame servicesFrame = new JFrame();
 
         JLabel servicesLabel = new JLabel("Choose Type of Service");
         JButton dietPlanButton = new JButton("Request Diet Plan");
-        JButton newButton = new JButton("");
+        JButton settingButton = new JButton("Change Body Info");
         JButton caloriesButton = new JButton("Calculate Calories");
         JButton IBWButton = new JButton("Calculate Ideal Body Weight");
         JButton logoutButton = new JButton("Logout");
@@ -260,14 +283,14 @@ public class AppFacade extends JFrame {
 
         servicesLabel.setBounds(100,50,1000,100);
         dietPlanButton.setBounds(100,150,200,40);
-        newButton.setBounds(400,250,200,40);
+        settingButton.setBounds(400,250,200,40);
         caloriesButton.setBounds(100,250,200,40);
         IBWButton.setBounds(400,150,200,40);
         logoutButton.setBounds(650,5,100,40);
 
         servicesFrame.add(servicesLabel);
         servicesFrame.add(dietPlanButton);
-        servicesFrame.add(newButton);
+        servicesFrame.add(settingButton);
         servicesFrame.add(IBWButton);
         servicesFrame.add(caloriesButton);
         servicesFrame.add(logoutButton);
@@ -285,16 +308,22 @@ public class AppFacade extends JFrame {
         dietPlanButton.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e){
+
                 /**/servicesFrame.setVisible(false);
-                informationScreen(userIDLog, "dietPlan");
+                if(cust.getGender() == null)
+                    informationScreen(cust, "dietPlan");
+                else
+                    dietPlanScreen(cust);
+
             }
         });
 
         //-------------------------------------------
-        newButton.addActionListener(new ActionListener()
+        settingButton.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e){
-
+                /**/servicesFrame.setVisible(false);
+                informationScreen(cust, "setting");
             }
         });
 
@@ -302,8 +331,12 @@ public class AppFacade extends JFrame {
         caloriesButton.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e){
+
                 /**/servicesFrame.setVisible(false);
-                informationScreen(userIDLog, "calories");
+                if(cust.getGender() == null)
+                    informationScreen(cust, "calories");
+                else
+                    caloriesScreen(cust);
             }
         });
 
@@ -311,8 +344,17 @@ public class AppFacade extends JFrame {
         IBWButton.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e){
-                /**/servicesFrame.setVisible(false);
-                informationScreen(userIDLog, "IBW");
+                if (cust.getGender() == null) {
+                    /**/servicesFrame.setVisible(false);
+                    informationScreen(cust, "IBW");
+                }
+                else{
+                    double ideal = calculateIBW(cust.getHeight(), cust.getGender());
+                    JOptionPane.showMessageDialog(servicesFrame, "Your Ideal Weight is ( " + ideal + " ) kg.",
+                            "Ideal Weight", JOptionPane.PLAIN_MESSAGE);
+                }
+
+
 
             }
         });
@@ -332,7 +374,7 @@ public class AppFacade extends JFrame {
     }
 
 
-    public static void informationScreen(String userIDLog, String nextScreen)
+    public  void informationScreen(Customer cust, String nextScreen)
     {
         JFrame informationFrame = new JFrame();
 
@@ -406,27 +448,42 @@ public class AppFacade extends JFrame {
         {
             public void actionPerformed(ActionEvent e) {
 
-                double weight = Double.parseDouble( weightField.getText());
-                double height = Double.parseDouble( heightField.getText());
-                int age = Integer.parseInt(ageField.getText());
-                String gender = "";
+                cust.setWeight(Double.parseDouble( weightField.getText()));
+                cust.setHeight(Double.parseDouble( heightField.getText()));
+                cust.setAge(Integer.parseInt(ageField.getText()));
 
                 if(maleBox.isSelected())
-                    gender = "male";
+                    cust.setGender("male");
                 else
-                    gender = "female";
+                    cust.setGender("female");
 
 
                 try {
 
-                    String update = "update customer set weight ='" + weight + "', height ='" + height + "', age ='" + age + "',gender ='" + gender   + "' where customer_ID ='" + userIDLog + "'";
-                    statement = connection.createStatement();
-                    statement.executeUpdate(update);
 
-                    if(nextScreen.equalsIgnoreCase("dietPlan")) {
-                        dietPlanScreen(userIDLog);
+                    if(nextScreen.equalsIgnoreCase("dietPlan")){
+                        dietPlanScreen(cust);
                         informationFrame.setVisible(false);
                     }
+                    else if(nextScreen.equalsIgnoreCase("calories")){
+                        caloriesScreen(cust);
+                        informationFrame.setVisible(false);
+                    }
+                    else if(nextScreen.equalsIgnoreCase("IBW")){
+                        double ideal = calculateIBW(cust.getHeight(), cust.getGender());
+                        JOptionPane.showMessageDialog(informationFrame, "Your Ideal Weight is ( " + ideal + " ) kg.",
+                                "Ideal Weight", JOptionPane.PLAIN_MESSAGE);
+                        servicesScreen(cust);
+                        informationFrame.setVisible(false);
+                    }
+                    else{
+                        JOptionPane.showMessageDialog(informationFrame, "Your body info has been updated!!",
+                                "Body Information", JOptionPane.PLAIN_MESSAGE);
+                        servicesScreen(cust);
+                        informationFrame.setVisible(false);
+                    }
+
+
                 } catch(Exception exception)
                 {
                     JOptionPane.showMessageDialog(informationFrame, "Wrong Information",
@@ -442,23 +499,82 @@ public class AppFacade extends JFrame {
             public void actionPerformed(ActionEvent e)
             {
                 informationFrame.setVisible(false);
-                servicesScreen(userIDLog);
+                servicesScreen(cust);
+            }
+        });
+    }
+
+    public double calculateIBW(double height, String gender){
+
+
+        double ideal = 0;
+        if(gender.equalsIgnoreCase("male"))
+            ideal= 52 + (1.9 * ((height - 152.4) / 2.54));
+        else
+            ideal= 49 + (1.7 * ((height - 152.4) / 2.54));
+
+        return Math.round(ideal * 100.0) / 100.0;   // Round up to 2 decimal places
+    }
+
+
+
+    public void caloriesScreen(Customer cust)
+    {
+        JFrame caloriesFrame = new JFrame();
+
+        double calories = (10 * cust.getWeight()) + (6.25 * cust.getHeight()) + (5 * cust.getAge()) + 5; // daily calories
+
+
+        double mildLoss = calories * 0.88;
+        double weightLoss = calories * 0.76;
+        double extremeLoss = calories * 0.53;
+
+        // Adding results to labels to represent it in the Interface
+        JLabel caloriesTitleLabel = new JLabel("Your Calories Per Day:");
+        JLabel maintainLabel = new JLabel("- To maintain weight you should consume " + Double.parseDouble(String.format("%.1f", calories)) + " calories per day.");
+        JLabel mildLossLabel = new JLabel("- To mildly lose weight you should consume " + Double.parseDouble(String.format("%.1f", mildLoss)) + " calories per day.");
+        JLabel weightLossLabel = new JLabel("- To lose weight you should consume " + Double.parseDouble(String.format("%.1f", weightLoss)) + " calories per day.");
+        JLabel extremeLossLabel = new JLabel("- To extremely lose weight you should consume " + Double.parseDouble(String.format("%.1f", extremeLoss)) + " calories per day.");
+        JButton gotItButton = new JButton("Got it!");
+
+        Font font = new Font("Arial",Font.BOLD,18);
+        caloriesTitleLabel.setFont(font);
+
+        // Labels & Button dimenstions
+        caloriesTitleLabel.setBounds(20,50,600,50);
+        maintainLabel.setBounds(50,100,600,30);
+        mildLossLabel.setBounds(50,150,600,30);
+        weightLossLabel.setBounds(50,200,600,30);
+        extremeLossLabel.setBounds(50,250,600,30);
+        gotItButton.setBounds(250,300,150,30);
+
+        // Adding the buttons and labels to interface
+        caloriesFrame.add(caloriesTitleLabel);
+        caloriesFrame.add(maintainLabel);
+        caloriesFrame.add(mildLossLabel);
+        caloriesFrame.add(weightLossLabel);
+        caloriesFrame.add(extremeLossLabel);
+        caloriesFrame.add(gotItButton);
+
+        caloriesFrame.setLayout(null);
+        caloriesFrame.setVisible(true);
+        caloriesFrame.setSize(700,400);
+
+        //------------ BUTTON ACTION ----------//
+        gotItButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                caloriesFrame.setVisible(false); // To hide the current screen
+                servicesScreen(cust);
+
             }
         });
     }
 
 
 
-
-
-    public static void caloriesScreen(double weight, double height, int age, String gender, String userIDLog)
-    {
-        JFrame caloriesFrame = new JFrame();
-    }
-
-
-
-    public static void dietPlanScreen(String userIDLog)
+    public void dietPlanScreen(Customer cust)
     {
         JFrame dietPlanFrame = new JFrame("Request Diet Plan");
 
@@ -469,6 +585,10 @@ public class AppFacade extends JFrame {
         JCheckBox oneMonth = new JCheckBox("1 Month");
         JCheckBox threeMonths = new JCheckBox("3 Months");
         JCheckBox sixMonths = new JCheckBox("6 Months");
+        twoWeeks.setActionCommand("2 Weeks");
+        oneMonth.setActionCommand("1 Month");
+        threeMonths.setActionCommand("3 Months");
+        sixMonths.setActionCommand("6 Months");
         JLabel priceLabel = new JLabel("Total: ");
         Font font = new Font("Arial",Font.BOLD,16);
         priceLabel.setFont(font);
@@ -478,7 +598,10 @@ public class AppFacade extends JFrame {
         JCheckBox extremeBox = new JCheckBox("Extreme Diet");
         JCheckBox ketoBox = new JCheckBox("Keto Diet");
         JCheckBox carbBox = new JCheckBox("Low Carb Diet");
-        JCheckBox otherBox = new JCheckBox("Other");
+        JCheckBox otherBox = new JCheckBox("Other Diet");
+        extremeBox.setActionCommand("Extreme Diet");
+        ketoBox.setActionCommand("Keto Diet");
+        carbBox.setActionCommand("Low Carb Diet");
         JLabel typeLabel = new JLabel("Type of Diet Plan:");
         typeLabel.setFont(font);
         JTextField otherTextField = new JTextField();
@@ -529,7 +652,7 @@ public class AppFacade extends JFrame {
         confirmButton.setBounds(650,250,170,30);
         backButton.setBounds(850,5,100,40);
 
-        //----------------- To Only Choose One  ----------------
+        //----------------- To Only Choose One ----------------
         ButtonGroup checkBoxGroup = new ButtonGroup();
         checkBoxGroup.add(extremeBox);
         checkBoxGroup.add(ketoBox);
@@ -575,7 +698,7 @@ public class AppFacade extends JFrame {
         twoWeeks.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
                 priceLabel.setText("Total: "
-                        + (e.getStateChange()==1?"SAR 49":""));
+                        + (e.getStateChange()==1?"SAR 49":""));     // Pattern 4 ish
             }
         });
         oneMonth.addItemListener(new ItemListener() {
@@ -608,30 +731,52 @@ public class AppFacade extends JFrame {
         {
             public void actionPerformed(ActionEvent e)
             {
-                String update = "";
                 try {
+                    int plan_id = 1;
+
+                    // Find the next id that hasnt been used
+                    String query = "select max(plan_id) from plan";
+                    PreparedStatement preparedStatement = connection.prepareStatement(query);
+                    ResultSet rezult3 = preparedStatement.executeQuery();
+                    rezult3.next();
+                    if(rezult3.getInt(plan_id) >= 1){
+                        plan_id += rezult3.getInt("MAX(PLAN_ID)");
+                    }
+
+
+                    String type = checkBoxGroup.getSelection().getActionCommand();
+                    String duration = checkBoxGroup2.getSelection().getActionCommand();
+                    double price = Double.parseDouble(priceLabel.getText().substring(11));
+
+                    System.out.println(type);
+                    System.out.println(duration);
+                    System.out.println(price);
+
+                    DietPlan dietPlan;
                     if(extremeBox.isSelected())
-                        update = "update customer set nutritionist_id ='" + 1 + "' where customer_id ='" + userIDLog + "'";
+                        dietPlan = new DietPlan(plan_id, type, duration, price, 1, cust);
+
                     else if(ketoBox.isSelected())
-                        update = "update customer set nutritionist_id ='" + 2 + "' where customer_id ='" + userIDLog + "'";
+                        dietPlan = new DietPlan(plan_id, type, duration, price, 2, cust);
+
                     else if(carbBox.isSelected())
-                        update = "update customer set nutritionist_id ='" + 3 + "' where customer_id ='" + userIDLog + "'";
+                        dietPlan = new DietPlan(plan_id, type, duration, price, 3, cust);
+
                     else if(otherBox.isSelected())
-                        update = "update customer set nutritionist_id ='" + 4 + "' where customer_id ='" + userIDLog + "'";
+                        dietPlan = new DietPlan(plan_id, otherTextField.getText(), duration, price, 4, cust);
+
                     else
                         throw new SQLException();  // If no check box of plan type was selected, throw exception
 
-                    if(!(twoWeeks.isSelected() || oneMonth.isSelected() || threeMonths.isSelected() || sixMonths.isSelected())){
+                    if(!(twoWeeks.isSelected() || oneMonth.isSelected() || threeMonths.isSelected() || sixMonths.isSelected()))
                         throw new SQLException(); // If no check box of plan duration was selected, throw exception
-                    }
 
-                    statement = connection.createStatement();
-                    statement.executeUpdate(update);
 
-                    JOptionPane.showMessageDialog(confirmButton, "Thank you for requesting!"+"\n"+"We will notify you once your plan is ready.",
+
+                    JOptionPane.showMessageDialog(confirmButton, "Thank you for requesting!"+"\n"+"We will notify you once your plan is ready via Email or Phone Number :D.",
                             "Done!", JOptionPane.PLAIN_MESSAGE);
                     dietPlanFrame.setVisible(false);
-                    servicesScreen(userIDLog);
+                    servicesScreen(cust);
 
                 } catch (SQLException e2) {
                     JOptionPane.showMessageDialog(dietPlanFrame, "Please select a duration and the type of the wanted plan",
@@ -649,7 +794,7 @@ public class AppFacade extends JFrame {
             public void actionPerformed(ActionEvent e)
             {
                 dietPlanFrame.setVisible(false);
-                servicesScreen(userIDLog);
+                servicesScreen(cust);
             }
         });
     }

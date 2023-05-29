@@ -1,6 +1,15 @@
 public class Nutritionist extends User{
-
-    public Nutritionist(int id, String fname, String lname, String phoneNum, String email, String password) {
+    private int yearsOfExperiance;
+    public Nutritionist(int id, String fname, String lname, String email, String password, String phoneNum, int yearsOfExperiance) {
         super(id, fname, lname, phoneNum, email, password);
+        this.yearsOfExperiance = yearsOfExperiance;
+    }
+
+    public int getYearsOfExperiance() {
+        return yearsOfExperiance;
+    }
+
+    public void setYearsOfExperiance(int yearsOfExperiance) {
+        this.yearsOfExperiance = yearsOfExperiance;
     }
 }

@@ -1,7 +1,5 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
+import java.sql.*;
+import java.util.*;
 
 
 public class Javaconnect {
@@ -41,5 +39,4 @@ public class Javaconnect {
 
 
 
-// Class.forName("oracle.jdbc.OracleDriver");
 

@@ -4,7 +4,7 @@ public class App {
 
     public static void main(String[] args) {
 
-        new AppFacade().startApp();     // FACADE
+        new AppFacade().startApp();      // Pattern 1
 
     }
 }
