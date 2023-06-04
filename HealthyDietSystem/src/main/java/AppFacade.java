@@ -1,32 +1,38 @@
-import javafx.scene.control.RadioButton;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.sql.*;
+import java.util.Observable;
+import java.util.Observer;
+public class AppFacade extends JFrame implements Observer {
+    private static Connection connection = null;
+    private static PreparedStatement preparedStatement = null;
+    private static Statement statement;
+    private Observable observable;
 
-
-public class AppFacade extends JFrame {
-    static Connection connection = null;
-    static PreparedStatement preparedStatement = null;
-    static Statement statement;
-
-
-    public void startApp(){
+    public void startApp() {
         try {
-            Javaconnect dbConnection = Javaconnect.getInstance();   // Pattern 2
+            Javaconnect dbConnection = Javaconnect.getInstance();
             connection = dbConnection.getConnection();
-
-        } catch (SQLException e){
+        } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e);
         }
 
+        observable = new Observable();
+        observable.addObserver(this);
+
         loginScreen();
-
-
     }
 
 
+    @Override
+    public void update(Observable o, Object arg) {
+        // Handle the update here
+        System.out.println("Received update from observable");
+    }
     public void loginScreen(){
 
         JFrame loginFrame = new JFrame();
@@ -124,7 +130,7 @@ public class AppFacade extends JFrame {
                         servicesScreen(cust);
                         loginFrame.setVisible(false);
 
-
+                        observable.notifyObservers();
                     }
                     else{
                         throw new SQLException();
@@ -247,7 +253,7 @@ public class AppFacade extends JFrame {
                             }
 
                             String insert = "insert into customer values('" + customer_id + "', '" + fnameInput + "', '" + lnameInput
-                                    + "', '" + emailInput + "', '" + passwordInput + "', null, null, null, null, '" + phoneInput + "', null)";
+                                    + "', '" + emailInput + "', '" + passwordInput + "', null, null, null, null, '" + phoneInput + "')";
                             preparedStatement = connection.prepareStatement(insert);
                             ResultSet rezult2 = preparedStatement.executeQuery();
                             rezult2.next();
@@ -698,7 +704,7 @@ public class AppFacade extends JFrame {
         twoWeeks.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
                 priceLabel.setText("Total: "
-                        + (e.getStateChange()==1?"SAR 49":""));     // Pattern 4 ish
+                        + (e.getStateChange()==1?"SAR 49":""));
             }
         });
         oneMonth.addItemListener(new ItemListener() {
@@ -800,6 +806,5 @@ public class AppFacade extends JFrame {
     }
 
 }
-
 
 

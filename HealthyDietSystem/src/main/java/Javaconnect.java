@@ -9,7 +9,7 @@ public class Javaconnect {
         private Connection connection;
         private static Javaconnect instance;
 
-        private Javaconnect() throws SQLException {
+        private Javaconnect() throws SQLException {   // Pattern 2 (Singleton)
             this.dbName = "ORCL";
             this.port = 1521;
             this.url = "jdbc:oracle:thin:@localhost:" + Integer.toString(this.port) + ":" + this.dbName;
